@@ -1,11 +1,11 @@
 
 use strict;
 use Test;
-BEGIN { plan tests => 12 };
+BEGIN { plan tests => 13 };
 use Algorithm::NaiveBayes;
 ok(1); # If we made it this far, we're loaded.
 
-my $nb = Algorithm::NaiveBayes->new;
+my $nb = Algorithm::NaiveBayes->new(purge => 0);
 ok $nb;
 
 # Populate
@@ -27,6 +27,8 @@ ok $nb->labels, 2;
 
 # Train
 $nb->train;
+
+ok $nb->purge, 0;
 
 # Predict
 my $h = $nb->predict( attributes => _hash(qw(i would like to begin farming sheep)) );

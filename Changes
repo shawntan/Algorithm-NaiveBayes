@@ -1,6 +1,12 @@
 Revision history for Perl extension Algorithm::NaiveBayes.
 
+0.02  Fri May 23 13:36:48 CDT 2003
+
+ - The do_purge() method was called during training regardless of
+   whether the 'purge' flag was set.  This has been fixed.
+
 0.01  Tue Mar 18 18:45:34 2003
-	- original version; created by h2xs 1.21 with options
-		-XA -n Algorithm::NaiveBayes
+
+ - original version; created by extracting the NaiveBayes code out of
+   AI::Categorizer::Learner::NaiveBayes
 

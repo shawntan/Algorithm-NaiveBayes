@@ -1,11 +1,13 @@
 package Algorithm::NaiveBayes;
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 use strict;
 
 sub new {
   my $package = shift;
   return bless {
+		purge => 1,
+		@_,
 		instances => 0,
 		attributes => {},
 		labels => {},
@@ -73,6 +75,20 @@ sub train {
       $m->{probs}{$label}{$attribute} = log($count + 1) - $denominator;
     }
   }
+  $self->do_purge if $self->purge;
+}
+
+sub do_purge {
+  my $self = shift;
+  foreach (values %{ $self->{labels} }) {
+    $_ = 1;
+  }
+}
+
+sub purge {
+  my $self = shift;
+  $self->{purge} = shift if @_;
+  return $self->{purge};
 }
 
 sub predict {
@@ -169,10 +185,21 @@ L<http://faure.iei.pi.cnr.it/~fabrizio/Publications/ACMCS02.pdf>
 
 =item new()
 
-Creates a new C<Algorithm::NaiveBayes> object and returns it.  At the
-moment there are no parameters that affect anything.
+Creates a new C<Algorithm::NaiveBayes> object and returns it.  The
+following parameters are accepted:
 
-=item add_instance( attributes => HASH, label => STRING|ARRAY )
+=over 4
+
+=item purge
+
+If set to a true value, the C<do_purge()> method will be invoked during
+C<train()>.  The default is true.  Set this to a false value if you'd
+like to be able to add additional instances after training and then
+call C<train()> again.
+
+=back
+
+=item add_instance( attributes =E<gt> HASH, label =E<gt> STRING|ARRAY )
 
 Adds a training instance to the categorizer.  The C<attributes>
 parameter contains a hash reference whose keys are string attributes
@@ -191,7 +218,7 @@ applicable labels, pass an empty array reference.
 Calculates the probabilities that will be necessary for categorization
 using the C<predict()> method.
 
-=item predict( attributes => HASH )
+=item predict( attributes =E<gt> HASH )
 
 Use this method to predict the label of an unknown instance.  The
 attributes should be of the same format as you passed to
@@ -204,11 +231,21 @@ In practice, scores using Naive Bayes tend to be very close to 0 or 1
 because of the way normalization is performed.  I might try to
 alleviate this in future versions of the code.
 
-=item labels
+=item labels()
 
 Returns a list of all the labels the object knows about (in no
 particular order), or the number of labels if called in a scalar
 context.
+
+=item do_purge()
+
+Purges training instances and their associated information from the
+NaiveBayes object.  This can save memory after training.
+
+=item purge()
+
+Returns true or false depending on the value of the object's C<purge>
+property.  An optional boolean argument sets the property.
 
 =back
 
