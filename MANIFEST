@@ -1,0 +1,8 @@
+Build.PL
+Changes
+INSTALL
+MANIFEST
+META.yml
+Makefile.PL
+lib/Algorithm/NaiveBayes.pm
+t/01-basic.t

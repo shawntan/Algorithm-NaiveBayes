@@ -1,0 +1,10 @@
+--- #YAML:1.0
+name: Algorithm-NaiveBayes
+version: 0.01
+license: perl
+distribution_type: module
+requires: {}
+recommends: {}
+build_requires: {}
+conflicts: {}
+generated_by: Module::Build version 0.15
