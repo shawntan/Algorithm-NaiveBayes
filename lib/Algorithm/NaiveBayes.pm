@@ -1,17 +1,27 @@
 package Algorithm::NaiveBayes;
 
-$VERSION = '0.02';
+$VERSION = '0.02_01';
 use strict;
 
 sub new {
   my $package = shift;
-  return bless {
-		purge => 1,
-		@_,
-		instances => 0,
-		attributes => {},
-		labels => {},
-	       }, $package;
+  my $self = {
+	      purge => 1,
+	      model_type => 'Frequency',
+	      @_,
+	      instances => 0,
+	      training_data => {},
+	     };
+  
+  if ($package eq __PACKAGE__) {
+    # Bless into the proper subclass
+    die "model_class cannot be set to " . __PACKAGE__ if $self->{model_class} eq __PACKAGE__;
+    $package = $self->{model_class} || __PACKAGE__ . "::Model::" . $self->{model_type};
+    eval "require $package" unless $package->can('new');
+    return $package->new(@_);
+  }
+  
+  return bless $self, $package;
 }
 
 sub add_instance {
@@ -21,68 +31,26 @@ sub add_instance {
   }
   for ($params{label}) {
     $_ = [$_] unless ref;
+    @{$self->{labels}}{@$_} = ();
   }
   
   $self->{instances}++;
-  
-  $self->_add_hash($self->{attributes}, $params{attributes});
-  
-  foreach my $label ( @{ $params{label} } ) {
-    $self->{labels}{$label}{count}++;
-    $self->{labels}{$label}{attributes} ||= {};
-    $self->_add_hash($self->{labels}{$label}{attributes}, $params{attributes});
-  }
+  $self->do_add_instance($params{attributes}, $params{label}, $self->{training_data});
 }
 
-sub _add_hash {
-  my ($self, $first, $second) = @_;
-  foreach my $k (keys %$second) {
-    $first->{$k} += $second->{$k};
-  }
-}
-
-sub _sum {
-  my $href = shift;
-  my $total = 0;
-  $total += $_ foreach values %$href;
-  return $total;
-}
-
-sub labels {
-  my $self = shift;
-  return keys %{ $self->{labels} };
-}
+sub labels { keys %{ $_[0]->{labels} } }
+sub instances  { $_[0]->{instances} }
+sub training_data { $_[0]->{training_data} }
 
 sub train {
   my $self = shift;
-  my $m = $self->{model} = {};
-  
-  my $vocab_size = keys %{ $self->{attributes} };
-  
-  # Calculate the log-probabilities for each category
-  foreach my $label ($self->labels) {
-    $m->{prior_probs}{$label} = log($self->{labels}{$label}{count} / $self->{instances});
-    
-    # Count the number of tokens in this cat
-    my $label_tokens = _sum($self->{labels}{$label}{attributes});
-    
-    # Compute a smoothing term so P(word|cat)==0 can be avoided
-    $m->{smoother}{$label} = -log($label_tokens + $vocab_size);
-    
-    my $denominator = log($label_tokens + $vocab_size);
-    
-    while (my ($attribute, $count) = each %{ $self->{labels}{$label}{attributes} }) {
-      $m->{probs}{$label}{$attribute} = log($count + 1) - $denominator;
-    }
-  }
+  $self->{model} = $self->do_train($self->{training_data});
   $self->do_purge if $self->purge;
 }
 
 sub do_purge {
   my $self = shift;
-  foreach (values %{ $self->{labels} }) {
-    $_ = 1;
-  }
+  delete $self->{training_data};
 }
 
 sub purge {
@@ -94,49 +62,8 @@ sub purge {
 sub predict {
   my ($self, %params) = @_;
   my $newattrs = $params{attributes} or die "Missing 'attributes' parameter for predict()";
-  my $m = $self->{model};  # For convenience
-  
-  # Note that we're using the log(prob) here.  That's why we add instead of multiply.
-  
-  my %scores;
-  while (my ($label, $attributes) = each %{$m->{probs}}) {
-    $scores{$label} = $m->{prior_probs}{$label}; # P($label)
-    
-    while (my ($feature, $value) = each %$newattrs) {
-      next unless exists $self->{attributes}{$feature};
-      $scores{$label} += ($attributes->{$feature} || $m->{smoother}{$label})*$value;   # P($feature|$label)**$value
-    }
-  }
-  
-  $self->_rescale(\%scores);
-  return \%scores;
+  return $self->do_predict($self->{model}, $newattrs);
 }
-
-sub _rescale {
-  my ($self, $scores) = @_;
-
-  # Scale everything back to a reasonable area in logspace (near zero), un-loggify, and normalize
-  my $total = 0;
-  my $max = _max(values %$scores);
-  foreach (values %$scores) {
-    $_ = exp($_ - $max);
-    $total += $_**2;
-  }
-  $total = sqrt($total);
-  foreach (values %$scores) {
-    $_ /= $total;
-  }
-}
-
-sub _max {
-  return undef unless @_;
-  my $max = shift;
-  foreach (@_) {
-    $max = $_ if $_ > $max;
-  }
-  return $max;
-}
-
 
 1;
 __END__

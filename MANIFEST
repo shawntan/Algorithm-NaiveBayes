@@ -5,4 +5,9 @@ MANIFEST
 META.yml
 Makefile.PL
 lib/Algorithm/NaiveBayes.pm
+lib/Algorithm/NaiveBayes/Model/Discrete.pm
+lib/Algorithm/NaiveBayes/Model/Frequency.pm
+lib/Algorithm/NaiveBayes/Model/Gaussian.pm
+lib/Algorithm/NaiveBayes/Util.pm
 t/01-basic.t
+t/02-discrete.t

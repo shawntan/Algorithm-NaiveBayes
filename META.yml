@@ -1,10 +1,22 @@
 --- #YAML:1.0
 name: Algorithm-NaiveBayes
-version: 0.01
+version: 0.02_01
 license: perl
 distribution_type: module
 requires: {}
 recommends: {}
 build_requires: {}
 conflicts: {}
-generated_by: Module::Build version 0.15
+provides:
+  Algorithm::NaiveBayes:
+    file: lib/Algorithm/NaiveBayes.pm
+    version: 0.02_01
+  Algorithm::NaiveBayes::Model::Discrete:
+    file: lib/Algorithm/NaiveBayes/Model/Discrete.pm
+  Algorithm::NaiveBayes::Model::Frequency:
+    file: lib/Algorithm/NaiveBayes/Model/Frequency.pm
+  Algorithm::NaiveBayes::Model::Gaussian:
+    file: lib/Algorithm/NaiveBayes/Model/Gaussian.pm
+  Algorithm::NaiveBayes::Util:
+    file: lib/Algorithm/NaiveBayes/Util.pm
+generated_by: Module::Build version 0.20_01

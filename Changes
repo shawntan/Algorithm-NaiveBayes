@@ -1,5 +1,18 @@
 Revision history for Perl extension Algorithm::NaiveBayes.
 
+0.03
+
+ - The double-loop inside the predict() method has been turned
+   inside-out, so that the outer loop is now over the new attributes,
+   rather than over the different labels in the training set.
+
+ - Some internal changes for making customization easier: moved the
+   model-creation code to new internal classes, making it easier to
+   write additional classes that handle model-creation differently.
+
+ - Moved some of the numerical utility functions to a
+   Algorithm::NaiveBayes::Util module.
+
 0.02  Fri May 23 13:36:48 CDT 2003
 
  - The do_purge() method was called during training regardless of
