@@ -3,22 +3,23 @@ package Algorithm::NaiveBayes::Util;
 use strict;
 use base qw(Exporter);
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(sum_hash max add_hash rescale);
+@EXPORT_OK = qw(sum sum_hash max variance add_hash rescale);
+
+use List::Util qw(max sum);
 
 sub sum_hash {
   my $href = shift;
-  my $total = 0;
-  $total += $_ foreach values %$href;
-  return $total;
+  return sum(values %$href);
 }
 
-sub max {
-  return undef unless @_;
-  my $max = shift;
-  foreach (@_) {
-    $max = $_ if $_ > $max;
-  }
-  return $max;
+sub variance {
+  my $array = shift;
+  return 0 unless @$array > 1;
+  my $mean = @_ ? shift : sum($array) / @$array;
+
+  my $var = 0;
+  $var += ($_ - $mean)**2 foreach @$array;
+  return $var / (@$array - 1);
 }
 
 sub add_hash {

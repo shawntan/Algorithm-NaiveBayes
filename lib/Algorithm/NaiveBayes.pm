@@ -1,6 +1,6 @@
 package Algorithm::NaiveBayes;
 
-$VERSION = '0.02_01';
+$VERSION = '0.03';
 use strict;
 
 sub new {
@@ -15,7 +15,7 @@ sub new {
   
   if ($package eq __PACKAGE__) {
     # Bless into the proper subclass
-    die "model_class cannot be set to " . __PACKAGE__ if $self->{model_class} eq __PACKAGE__;
+    die "model_class cannot be set to " . __PACKAGE__ if ($self->{model_class}||'') eq __PACKAGE__;
     $package = $self->{model_class} || __PACKAGE__ . "::Model::" . $self->{model_type};
     eval "require $package" unless $package->can('new');
     return $package->new(@_);
@@ -248,6 +248,14 @@ framework, and that's what you see here.
 =head1 AUTHOR
 
 Ken Williams, ken@mathforum.org
+
+=head1 COPYRIGHT
+
+Copyright 2003-2004 Ken Williams.  All rights reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
 
 =head1 SEE ALSO
 
