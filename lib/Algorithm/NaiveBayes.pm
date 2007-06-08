@@ -1,27 +1,52 @@
 package Algorithm::NaiveBayes;
 
-$VERSION = '0.03';
 use strict;
+use Storable;
+
+use vars qw($VERSION);
+$VERSION = '0.04';
 
 sub new {
   my $package = shift;
-  my $self = {
+  my $self = bless {
+	      version => $VERSION,
 	      purge => 1,
 	      model_type => 'Frequency',
 	      @_,
 	      instances => 0,
 	      training_data => {},
-	     };
+	     }, $package;
   
   if ($package eq __PACKAGE__) {
     # Bless into the proper subclass
-    die "model_class cannot be set to " . __PACKAGE__ if ($self->{model_class}||'') eq __PACKAGE__;
-    $package = $self->{model_class} || __PACKAGE__ . "::Model::" . $self->{model_type};
-    eval "require $package" unless $package->can('new');
-    return $package->new(@_);
+    return $self->_load_model_class->new(@_);
   }
   
   return bless $self, $package;
+}
+
+sub _load_model_class {
+  my $self = shift;
+  die "model_class cannot be set to " . __PACKAGE__ if ($self->{model_class}||'') eq __PACKAGE__;
+  my $package = $self->{model_class} || __PACKAGE__ . "::Model::" . $self->{model_type};
+  unless ($package->can('new')) {
+    eval "use $package";
+    die $@ if $@;
+  }
+  return $package;
+}
+
+sub save_state {
+  my ($self, $path) = @_;
+  Storable::nstore($self, $path);
+}
+
+sub restore_state {
+  my ($pkg, $path) = @_;
+  my $self = Storable::retrieve($path)
+    or die "Can't restore state from $path: $!";
+  $self->_load_model_class;
+  return $self;
 }
 
 sub add_instance {
@@ -173,6 +198,21 @@ NaiveBayes object.  This can save memory after training.
 
 Returns true or false depending on the value of the object's C<purge>
 property.  An optional boolean argument sets the property.
+
+=item save_state($path)
+
+This object method saves the object to disk for later use.  The
+C<$path> argument indicates the place on disk where the object should
+be saved:
+
+  $nb->save_state($path);
+
+=item restore_state($path)
+
+This class method reads the file specified by C<$path> and returns the
+object that was previously stored there using C<save_state()>:
+
+  $nb = Algorithm::NaiveBayes->restore_state($path);
 
 =back
 

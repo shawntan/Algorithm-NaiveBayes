@@ -1,5 +1,12 @@
 Revision history for Perl extension Algorithm::NaiveBayes.
 
+ - Fixed a runtime error in the Gaussian model - the code died looking
+   for a rescale() function, which I had forgotten to import. [Manju Putcha]
+
+ - Added save_state() and restore_state() methods, which will help
+   consumers (like AI::Categorizer) avoid a pesky "can't find method"
+   error when using a restored model.
+
 0.03  Mon May 17 22:11:00 CDT 2004
 
  - The double-loop inside the predict() method has been turned

@@ -2,7 +2,7 @@ package Algorithm::NaiveBayes::Model::Gaussian;
 
 use strict;
 use base qw(Algorithm::NaiveBayes);
-use Algorithm::NaiveBayes::Util qw(sum variance);
+use Algorithm::NaiveBayes::Util qw(sum variance rescale);
 use constant Pi => 4*atan2(1, 1);
 
 sub do_add_instance {
