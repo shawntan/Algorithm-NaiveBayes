@@ -32,7 +32,6 @@ sub add_hash {
 sub rescale {
 
   my ($scores) = @_;
-  my ($scores) = @_;
   my $max = max(values %$scores);
   my $sumexp = 0;
   foreach ( values %$scores ) { $sumexp += exp($_ - $max); }
