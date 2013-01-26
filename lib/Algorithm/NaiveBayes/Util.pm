@@ -30,19 +30,18 @@ sub add_hash {
 }
 
 sub rescale {
-  my ($scores) = @_;
 
-  # Scale everything back to a reasonable area in logspace (near zero), un-loggify, and normalize
-  my $total = 0;
+  my ($scores) = @_;
+  my ($scores) = @_;
   my $max = max(values %$scores);
-  foreach (values %$scores) {
-    $_ = exp($_ - $max);
-    $total += $_**2;
+  my $sumexp = 0;
+  foreach ( values %$scores ) { $sumexp += exp($_ - $max); }
+  my $total = $max + log( $sumexp );
+  while( my ( $cls, $lp ) = each( %$scores ) ) {
+    $scores->{$cls} = exp( $lp -
+      $total );
   }
-  $total = sqrt($total);
-  foreach (values %$scores) {
-    $_ /= $total;
-  }
+
 }
 
 1;
